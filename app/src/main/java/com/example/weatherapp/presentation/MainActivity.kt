@@ -2,6 +2,7 @@ package com.example.weatherapp.presentation
 
 import android.app.ProgressDialog
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun showLoading() {
+        Log.e("test123","Loading")
         // Afișează mesajul de încărcare sau animația corespunzătoare
         progressDialog = ProgressDialog(this)
         progressDialog?.apply {
@@ -46,5 +48,10 @@ class MainActivity : AppCompatActivity() {
             setCancelable(true)
             show()
         }
+    }
+
+    override fun onDestroy() {
+        weatherViewModel.stopWeatherUpdates()
+        super.onDestroy()
     }
 }

@@ -1,5 +1,7 @@
 package com.example.weatherapp.presentation.viewmodel
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,18 +23,29 @@ class WeatherViewModel @Inject constructor(
     private val _weatherViewState = MutableLiveData<DataState<Weather>>()
     val weatherViewState: LiveData<DataState<Weather>>
         get() = _weatherViewState
+    private val updateHandler = Handler(Looper.getMainLooper())
+    private val updateIntervalMillis = 60000L // Intervalul de actualizare: 1 minut
     fun getWeather(latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            _weatherViewState.value = DataState.Loading
-            try {
-                val result = withContext(Dispatchers.IO) {
-                   getWeatherUseCase(latitude, longitude)
+        updateHandler.post(object : Runnable{
+            override fun run() {
+                viewModelScope.launch {
+                    _weatherViewState.value = DataState.Loading
+                    try {
+                        val result = withContext(Dispatchers.IO) {
+                            getWeatherUseCase(latitude, longitude)
+                        }
+                        _weatherViewState.value = DataState.Success(result)
+                    } catch (e: Exception) {
+                        Log.e("test123",e.message.toString())
+                        _weatherViewState.value = DataState.Error(e)
+                    }
                 }
-                _weatherViewState.value = DataState.Success(result)
-            } catch (e: Exception) {
-                Log.e("test123",e.message.toString())
-                _weatherViewState.value = DataState.Error(e)
+                updateHandler.postDelayed(this, updateIntervalMillis)
             }
-        }
+
+        })
+    }
+    fun stopWeatherUpdates() {
+        updateHandler.removeCallbacksAndMessages(null)
     }
 }
