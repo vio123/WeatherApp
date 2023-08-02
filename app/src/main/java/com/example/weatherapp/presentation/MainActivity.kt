@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.weatherapp.R
+import com.example.weatherapp.common.DataState
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.presentation.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             when(state){
                 is DataState.Loading -> showLoading()
                 is DataState.Success -> {
-                    binding?.weather = state.weather
+                    binding?.weather = state.data
                     progressDialog?.dismiss()
                 }
                 else -> {
@@ -36,17 +37,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        /*
-        viewModel?.getWeather(44.6135,27.5645)
-        viewModel?.weatherData?.observe(this){
-            binding?.weather = it
-            Toast.makeText(this,it.temperature.toString(),Toast.LENGTH_SHORT).show()
-        }
-        viewModel?.error?.observe(this){
-            Log.e("test123",it)
-        }
-
-         */
     }
     private fun showLoading() {
         // Afișează mesajul de încărcare sau animația corespunzătoare

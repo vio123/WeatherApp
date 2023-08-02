@@ -1,4 +1,5 @@
-package com.example.weatherapp.data.remote.api
+package com.example.weatherapp.common
+
 
 sealed class DataState<out R> {
     data class Success<out T>(val data: T) : DataState<T>()

@@ -1,42 +1,30 @@
 package com.example.weatherapp.data.repository
 
-import android.util.Log
+import com.example.weatherapp.common.DataState
 import com.example.weatherapp.data.local.dao.TemperatureDao
 import com.example.weatherapp.data.local.entity.WeatherEntity
-import com.example.weatherapp.data.remote.api.DataState
-import com.example.weatherapp.data.remote.api.WeatherApiService
+import com.example.weatherapp.data.remote.RemoteDataSource
 import com.example.weatherapp.data.remote.dto.WeatherDto
 import com.example.weatherapp.domain.model.Weather
 import com.example.weatherapp.domain.repository.WeatherRepository
-import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(
-    private val weatherApiService: WeatherApiService,
-    private val temperatureDao: TemperatureDao
+    private val temperatureDao: TemperatureDao,
+    private val remoteDataSource: RemoteDataSource
 ) :
     WeatherRepository {
-    private suspend fun getWeatherApi(latitude: Double, longitude: Double): DataState<Weather> {
-        return try {
-            DataState.Loading
-            val weatherResponse = weatherApiService.getWeather(latitude, longitude)
-            val weather = weatherResponse.toWeather()
-            temperatureDao.insert(weatherResponse.toWeatherEntity())
-            DataState.Success(weather)
-        } catch (e: Exception) {
-            DataState.Error(e)
-        }
-    }
 
-    override suspend fun getWeatherRemote(latitude: Double, longitude: Double): Weather {
+    override suspend fun getWeather(latitude: Double, longitude: Double): Weather {
 
-        return when (val weatherDataState = getWeatherApi(latitude, longitude)) {
+        return when (val weatherDataState = remoteDataSource.getWeatherRemote(latitude, longitude)) {
             is DataState.Loading -> {
                 // În cazul în care este încărcare, poți arunca o excepție sau să gestionezi altfel această stare
                 throw IllegalStateException("Eroare: Încărcare în curs")
             }
             is DataState.Success -> {
-                val weather = weatherDataState.data
+                val weather = weatherDataState.data.toWeather()
+                temperatureDao.insert(weatherDataState.data.toWeatherEntity())
                 weather // Returnezi obiectul Weather din starea de succes
             }
             is DataState.Error -> {
