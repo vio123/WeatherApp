@@ -8,10 +8,7 @@ import com.example.weatherapp.data.remote.api.WeatherApiService
 import com.example.weatherapp.data.remote.dto.WeatherDto
 import com.example.weatherapp.domain.model.Weather
 import com.example.weatherapp.domain.repository.WeatherRepository
-import com.skydoves.sandwich.suspendOnSuccess
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(
@@ -19,12 +16,37 @@ class WeatherRepositoryImpl @Inject constructor(
     private val temperatureDao: TemperatureDao
 ) :
     WeatherRepository {
+    private suspend fun getWeatherApi(latitude: Double, longitude: Double): DataState<Weather> {
+        return try {
+            DataState.Loading
+            val weatherResponse = weatherApiService.getWeather(latitude, longitude)
+            val weather = weatherResponse.toWeather()
+            temperatureDao.insert(weatherResponse.toWeatherEntity())
+            DataState.Success(weather)
+        } catch (e: Exception) {
+            DataState.Error(e)
+        }
+    }
 
     override suspend fun getWeatherRemote(latitude: Double, longitude: Double): Weather {
-        val weatherResponse = weatherApiService.getWeather(latitude, longitude)
-        val weather = weatherResponse.toWeather()
-        temperatureDao.insert(weatherResponse.toWeatherEntity())
-        return weather
+
+        return when (val weatherDataState = getWeatherApi(latitude, longitude)) {
+            is DataState.Loading -> {
+                // În cazul în care este încărcare, poți arunca o excepție sau să gestionezi altfel această stare
+                throw IllegalStateException("Eroare: Încărcare în curs")
+            }
+            is DataState.Success -> {
+                val weather = weatherDataState.data
+                weather // Returnezi obiectul Weather din starea de succes
+            }
+            is DataState.Error -> {
+                // În cazul în care este eroare, poți arunca o excepție sau să gestionezi altfel această stare
+                throw IllegalStateException("Eroare la preluarea datelor meteorologice: ${weatherDataState}")
+            }
+            else -> {
+                throw IllegalStateException("Eroare la preluarea datelor meteorologice: ${weatherDataState}")
+            }
+        }
     }
 
     private fun WeatherDto.toWeather(): Weather {
@@ -33,7 +55,7 @@ class WeatherRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun WeatherDto.toWeatherEntity(): WeatherEntity{
+    private fun WeatherDto.toWeatherEntity(): WeatherEntity {
         return WeatherEntity(
             temperature = this.currentTemperatureDto.temperature
         )
