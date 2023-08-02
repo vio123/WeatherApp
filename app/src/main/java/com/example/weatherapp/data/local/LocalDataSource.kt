@@ -10,4 +10,12 @@ class LocalDataSource @Inject constructor(
     fun getWeatherLocal(): WeatherEntity {
         return temperatureDao.getAllTemperatures()[0]
     }
+
+    suspend fun insertWeather(weatherEntity: WeatherEntity){
+        temperatureDao.insert(weatherEntity)
+    }
+
+    suspend fun deleteAll(){
+        temperatureDao.deleteAll()
+    }
 }

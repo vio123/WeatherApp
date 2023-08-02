@@ -14,4 +14,7 @@ interface TemperatureDao {
 
     @Query("Select * from Temperature order by id DESC")
     fun getAllTemperatures(): List<WeatherEntity>
+
+    @Query("DELETE FROM Temperature")
+    suspend fun deleteAll()
 }

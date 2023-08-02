@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class WeatherRepositoryImpl @Inject constructor(
-    private val temperatureDao: TemperatureDao,
     private val remoteDataSource: RemoteDataSource,
     private val localDataSource: LocalDataSource,
     private val sharedPreferences: SharedPreferences
@@ -51,6 +50,7 @@ class WeatherRepositoryImpl @Inject constructor(
         return if (differenceInMinutes >= 1) {
             // Se face un apel la API pentru datele actuale
             val weather = getWeatherRemote(latitude, longitude)
+            localDataSource.deleteAll()
             saveWeatherToLocalDatabase(weather)
             updateLastApiCallTime(currentTime)
             weather
@@ -61,7 +61,7 @@ class WeatherRepositoryImpl @Inject constructor(
     }
     private suspend fun saveWeatherToLocalDatabase(weather: Weather) {
         // Salvează datele în baza de date locală
-        temperatureDao.insert(weather.toWeatherEntity())
+        localDataSource.insertWeather(weather.toWeatherEntity())
     }
 
     private fun updateLastApiCallTime(currentTime: Long) {
