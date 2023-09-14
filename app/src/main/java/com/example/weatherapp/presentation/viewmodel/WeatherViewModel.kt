@@ -37,7 +37,7 @@ class WeatherViewModel @Inject constructor(
                         _weatherViewState.value = DataState.Success(result)
                     } catch (e: Exception) {
                         Log.e("test123",e.message.toString())
-                        _weatherViewState.value = DataState.Error(e)
+                        _weatherViewState.value = DataState.Error(e,Weather())
                     }
                 }
                 updateHandler.postDelayed(this, updateIntervalMillis)

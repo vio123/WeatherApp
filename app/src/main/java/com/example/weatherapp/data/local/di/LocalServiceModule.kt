@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import androidx.room.Room
 import com.example.weatherapp.data.local.dao.TemperatureDao
+import com.example.weatherapp.data.utils.MyEntityToDomainMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,5 +43,11 @@ object LocalServiceModule {
     @Singleton
     fun provideSharedPreferences(application: Application): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(application)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMapper(): MyEntityToDomainMapper {
+        return MyEntityToDomainMapper()
     }
 }
