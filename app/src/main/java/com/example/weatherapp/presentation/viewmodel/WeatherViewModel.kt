@@ -25,6 +25,8 @@ class WeatherViewModel @Inject constructor(
         get() = _weatherViewState
     private val updateHandler = Handler(Looper.getMainLooper())
     private val updateIntervalMillis = 60000L // Intervalul de actualizare: 1 minut
+
+    //exception handler coroutine
     fun getWeather(latitude: Double, longitude: Double) {
         updateHandler.post(object : Runnable{
             override fun run() {
