@@ -17,8 +17,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null
-
-
     private val weatherViewModel: WeatherViewModel by viewModels()
     private var progressDialog: ProgressDialog? = null
 
@@ -27,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         weatherViewModel.getWeather(44.6135, 27.5645)
         weatherViewModel.weatherViewState.observe(this) { state ->
-            when(state){
+            when (state) {
                 is DataState.Loading -> showLoading()
                 is DataState.Success -> {
                     binding?.weather = state.data
@@ -39,8 +37,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun showLoading() {
-        Log.e("test123","Loading")
+        Log.e("test123", "Loading")
         // Afișează mesajul de încărcare sau animația corespunzătoare
         progressDialog = ProgressDialog(this)
         progressDialog?.apply {
