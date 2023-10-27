@@ -4,5 +4,5 @@ import com.squareup.moshi.Json
 
 data class TemperatureDto(
     @Json(name = "temperature")
-    val temperature:Double = -5000.0
+    var temperature:Double = -5000.0
 )
